@@ -78,9 +78,8 @@ const placeSchema = new mongoose.Schema({
   }
 });
 
-placeSchema.pre('save', function(next) {
+placeSchema.pre('save', function () {
   this.updatedAt = Date.now();
-  next();
 });
 
 module.exports = mongoose.model('Place', placeSchema);

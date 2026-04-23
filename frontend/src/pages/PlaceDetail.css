@@ -1,0 +1,236 @@
+.place-detail {
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.gallery-section {
+  margin-bottom: 2rem;
+}
+
+.main-image {
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 15px;
+  margin-bottom: 1rem;
+}
+
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-gallery {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.thumbnail.active {
+  border: 3px solid #667eea;
+  opacity: 0.8;
+}
+
+.info-section {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.info-section h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.category-tag-large {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.quick-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.info-icon {
+  font-size: 1.5rem;
+  color: #667eea;
+}
+
+.info-card strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.info-card p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.description h3,
+.visiting-hours h3,
+.dress-code h3,
+.map-section h3,
+.photography-tips h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.description p {
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.visiting-hours,
+.dress-code {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.dress-icons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.dress-icons span {
+  background: #e0e0e0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.add-to-itinerary {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-top: 1rem;
+}
+
+.add-to-itinerary:hover {
+  transform: translateY(-2px);
+}
+
+.map-section {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.photography-tips {
+  background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+  padding: 1.5rem;
+  border-radius: 15px;
+  color: white;
+}
+
+.photography-tips h3 {
+  color: white;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(255,255,255,0.2);
+  padding: 0.8rem;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.tip-icon {
+  font-size: 1.2rem;
+}
+
+.tip-icon.sunrise {
+  color: #ffd700;
+}
+
+.tip-icon.sunset {
+  color: #ff6b6b;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .detail-container {
+    padding: 1rem;
+  }
+  
+  .main-image {
+    height: 300px;
+  }
+  
+  .info-section h1 {
+    font-size: 1.8rem;
+  }
+  
+  .quick-info {
+    grid-template-columns: 1fr;
+  }
+}
