@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaCamera, FaUserShield } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
 import AdminLogin from './AdminLogin';
 import './Navbar.css';
 
@@ -9,7 +8,18 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const navigate = useNavigate();
-  const { isAdmin, logout } = useAuth();
+
+  const getAdminInfo = () => {
+    try {
+      const data = localStorage.getItem('adminInfo');
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const adminInfo = getAdminInfo();
+  const isAdmin = !!adminInfo;
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -20,7 +30,7 @@ const Navbar = () => {
   };
 
   const handleAdminClick = () => {
-    if (isAdmin()) {
+    if (isAdmin) {
       navigate('/admin');
     } else {
       setShowAdminLogin(true);
@@ -28,7 +38,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem('adminInfo');
     navigate('/');
     window.location.reload();
   };
@@ -39,14 +49,20 @@ const Navbar = () => {
         <div className="nav-container">
           <Link to="/" className="nav-logo">
             <FaCamera className="logo-icon" />
-            <span>Tourism<span className="highlight">Guide</span></span>
+            <span>
+              Tourism<span className="highlight">Guide</span>
+            </span>
           </Link>
 
           <div className="nav-links">
             <Link to="/" className="nav-link">Home</Link>
             <Link to="/places" className="nav-link">All Places</Link>
             <Link to="/itinerary" className="nav-link">Plan Your Day</Link>
-            {isAdmin() && <Link to="/admin" className="nav-link admin-link">Admin Panel</Link>}
+            {isAdmin && (
+              <Link to="/admin" className="nav-link admin-link">
+                Admin Panel
+              </Link>
+            )}
           </div>
 
           <div className="nav-right">
@@ -62,14 +78,14 @@ const Navbar = () => {
                 <FaSearch />
               </button>
             </form>
-            
-            <button onClick={handleAdminClick} className="admin-btn">
+
+            <button onClick={handleAdminClick} className="admin-btn" type="button">
               <FaUserShield />
-              {isAdmin() ? 'Admin' : 'Login'}
+              {isAdmin ? 'Admin' : 'Login'}
             </button>
-            
-            {isAdmin() && (
-              <button onClick={handleLogout} className="logout-btn">
+
+            {isAdmin && (
+              <button onClick={handleLogout} className="logout-btn" type="button">
                 Logout
               </button>
             )}

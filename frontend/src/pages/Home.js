@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { FaMapMarkedAlt, FaSun, FaStar, FaCamera, FaClock, FaChevronRight, FaHeart, FaShare } from 'react-icons/fa';
+import {
+  FaMapMarkedAlt,
+  FaSun,
+  FaStar,
+  FaCamera,
+  FaClock,
+  FaChevronRight,
+  FaHeart,
+  FaShare
+} from 'react-icons/fa';
 import './Home.css';
+
+const BACKEND_URL = 'http://localhost:5000';
 
 const Home = () => {
   const [featuredPlaces, setFeaturedPlaces] = useState([]);
@@ -12,60 +23,122 @@ const Home = () => {
 
   useEffect(() => {
     fetchData();
-    // Auto-rotate hero images
+  }, []);
+
+  useEffect(() => {
+    if (heroImages.length === 0) return;
+
     const interval = setInterval(() => {
       setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length);
     }, 5000);
+
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [heroImages]);
+
+  const getImageUrl = (place, fallback) => {
+    if (!place.images || place.images.length === 0) {
+      return fallback;
+    }
+
+    const imageObj = place.images[0];
+
+    if (!imageObj?.url) {
+      return fallback;
+    }
+
+    return imageObj.url.startsWith('http')
+      ? imageObj.url
+      : `${BACKEND_URL}${imageObj.url}`;
+  };
 
   const fetchData = async () => {
     try {
       const [placesRes, trendingRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/places'),
-        axios.get('http://localhost:5000/api/places?trending=true')
+        axios.get(`${BACKEND_URL}/api/places`),
+        axios.get(`${BACKEND_URL}/api/places?trending=true`)
       ]);
+
       setFeaturedPlaces(placesRes.data.slice(0, 6));
       setTrendingPlaces(trendingRes.data);
-      
-      // Extract hero images from places
+
       const images = placesRes.data
-        .filter(place => place.images && place.images.length > 0)
+        .filter((place) => place.images && place.images.length > 0 && place.images[0]?.url)
         .slice(0, 5)
-        .map(place => ({
-          url: place.images[0].url,
+        .map((place) => ({
+          url: place.images[0].url.startsWith('http')
+            ? place.images[0].url
+            : `${BACKEND_URL}${place.images[0].url}`,
           name: place.name,
-          caption: place.shortDescription || place.description.substring(0, 100)
+          caption: place.shortDescription || place.description?.substring(0, 100) || ''
         }));
+
       setHeroImages(images);
     } catch (error) {
       console.error('Error fetching data:', error);
-      // Use default images if API fails
       setHeroImages([
-        { url: 'https://images.unsplash.com/photo-1532372320572-66c3e2d0a8e8', name: 'Sigiriya Lion Rock', caption: 'Ancient rock fortress' },
-        { url: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1', name: 'Dambulla Cave Temple', caption: 'UNESCO World Heritage Site' }
+        {
+          url: 'https://images.unsplash.com/photo-1532372320572-66c3e2d0a8e8',
+          name: 'Sigiriya Lion Rock',
+          caption: 'Ancient rock fortress'
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1',
+          name: 'Dambulla Cave Temple',
+          caption: 'UNESCO World Heritage Site'
+        }
       ]);
     }
   };
 
   const categoriesData = [
-    { name: 'Historical', icon: '🏛️', color: '#FF6B6B', description: 'Ancient temples & monuments', image: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1' },
-    { name: 'Nature', icon: '🌿', color: '#4ECDC4', description: 'Lakes, parks & scenic views', image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e' },
-    { name: 'Religious Sites', icon: '🕉️', color: '#FFE66D', description: 'Sacred sites & temples', image: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1' },
-    { name: 'Sightseeing', icon: '📸', color: '#A8E6CF', description: 'Popular tourist spots', image: 'https://images.unsplash.com/photo-1532372320572-66c3e2d0a8e8' },
+    {
+      name: 'Historical',
+      icon: '🏛️',
+      color: '#FF6B6B',
+      description: 'Ancient temples & monuments',
+      image: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1'
+    },
+    {
+      name: 'Nature',
+      icon: '🌿',
+      color: '#4ECDC4',
+      description: 'Lakes, parks & scenic views',
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e'
+    },
+    {
+      name: 'Religious Sites',
+      icon: '🕉️',
+      color: '#FFE66D',
+      description: 'Sacred sites & temples',
+      image: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1'
+    },
+    {
+      name: 'Sightseeing',
+      icon: '📸',
+      color: '#A8E6CF',
+      description: 'Popular tourist spots',
+      image: 'https://images.unsplash.com/photo-1532372320572-66c3e2d0a8e8'
+    }
   ];
 
   return (
     <div className="home">
-      {/* Hero Section with Image Slider */}
       <section className="hero-slider">
         {heroImages.length > 0 && (
-          <div className="hero-slide" style={{ backgroundImage: `url(${heroImages[currentHeroIndex]?.url})` }}>
+          <div
+            className="hero-slide"
+            style={{ backgroundImage: `url(${heroImages[currentHeroIndex]?.url})` }}
+          >
             <div className="hero-overlay"></div>
             <div className="hero-content">
               <div className="hero-badge">Discover Sri Lanka</div>
-              <h1 className="hero-title">Explore {heroImages[currentHeroIndex]?.name || 'Paradise'}</h1>
-              <p className="hero-subtitle">{heroImages[currentHeroIndex]?.caption || 'Your visual guide to the most Instagram-worthy locations'}</p>
+              <h1 className="hero-title">
+                Explore {heroImages[currentHeroIndex]?.name || 'Paradise'}
+              </h1>
+              <p className="hero-subtitle">
+                {heroImages[currentHeroIndex]?.caption ||
+                  'Your visual guide to the most Instagram-worthy locations'}
+              </p>
               <div className="hero-buttons">
                 <Link to="/places" className="btn-primary">
                   Explore Now <FaChevronRight />
@@ -77,8 +150,8 @@ const Home = () => {
             </div>
             <div className="hero-dots">
               {heroImages.map((_, idx) => (
-                <span 
-                  key={idx} 
+                <span
+                  key={idx}
                   className={`dot ${currentHeroIndex === idx ? 'active' : ''}`}
                   onClick={() => setCurrentHeroIndex(idx)}
                 />
@@ -88,7 +161,6 @@ const Home = () => {
         )}
       </section>
 
-      {/* Stats Section */}
       <section className="stats-section">
         <div className="stats-container">
           <div className="stat-item">
@@ -110,7 +182,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categories Section with Images */}
       <section className="categories-section">
         <div className="section-header">
           <h2>Explore by Category</h2>
@@ -118,7 +189,11 @@ const Home = () => {
         </div>
         <div className="category-grid-modern">
           {categoriesData.map((category, index) => (
-            <Link to={`/category/${category.name.toLowerCase()}`} key={index} className="category-card-modern">
+            <Link
+              to={`/category/${category.name.toLowerCase()}`}
+              key={index}
+              className="category-card-modern"
+            >
               <div className="category-image-wrapper">
                 <img src={category.image} alt={category.name} />
                 <div className="category-overlay"></div>
@@ -133,7 +208,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Trending Destinations */}
       {trendingPlaces.length > 0 && (
         <section className="trending-section">
           <div className="section-header">
@@ -144,25 +218,39 @@ const Home = () => {
             <p>Discover what everyone's talking about this week</p>
           </div>
           <div className="trending-grid">
-            {trendingPlaces.slice(0, 4).map(place => (
+            {trendingPlaces.slice(0, 4).map((place) => (
               <Link to={`/place/${place._id}`} key={place._id} className="trending-card">
                 <div className="trending-image">
-                  <img src={place.images?.[0]?.url || 'https://via.placeholder.com/400x500'} alt={place.name} />
+                  <img
+                    src={getImageUrl(place, 'https://via.placeholder.com/400x500')}
+                    alt={place.name}
+                  />
                   <div className="trending-rank">
-                    #{trendingPlaces.findIndex(p => p._id === place._id) + 1}
+                    #{trendingPlaces.findIndex((p) => p._id === place._id) + 1}
                   </div>
                   <div className="trending-overlay">
-                    <button className="heart-icon"><FaHeart /></button>
-                    <button className="share-icon"><FaShare /></button>
+                    <button className="heart-icon" type="button">
+                      <FaHeart />
+                    </button>
+                    <button className="share-icon" type="button">
+                      <FaShare />
+                    </button>
                   </div>
                 </div>
                 <div className="trending-info">
                   <h3>{place.name}</h3>
                   <div className="trending-meta">
                     <span className="category">{place.category}</span>
-                    <span className="distance"><FaMapMarkedAlt /> {place.distance}km</span>
+                    <span className="distance">
+                      <FaMapMarkedAlt /> {place.distance}km
+                    </span>
                   </div>
-                  <p>{place.shortDescription?.substring(0, 80) || place.description.substring(0, 80)}...</p>
+                  <p>
+                    {place.shortDescription?.substring(0, 80) ||
+                      place.description?.substring(0, 80) ||
+                      'No description available'}
+                    ...
+                  </p>
                 </div>
               </Link>
             ))}
@@ -175,17 +263,19 @@ const Home = () => {
         </section>
       )}
 
-      {/* Featured Places Grid */}
       <section className="featured-section">
         <div className="section-header">
           <h2>Featured Destinations</h2>
           <p>Handpicked places for your perfect getaway</p>
         </div>
         <div className="featured-grid">
-          {featuredPlaces.map(place => (
+          {featuredPlaces.map((place) => (
             <Link to={`/place/${place._id}`} key={place._id} className="featured-card">
               <div className="featured-image">
-                <img src={place.images?.[0]?.url || 'https://via.placeholder.com/400x300'} alt={place.name} />
+                <img
+                  src={getImageUrl(place, 'https://via.placeholder.com/400x300')}
+                  alt={place.name}
+                />
                 {place.trending && <span className="trending-badge">🔥 Trending</span>}
                 <div className="image-overlay">
                   <FaCamera className="camera-icon" />
@@ -194,9 +284,16 @@ const Home = () => {
               <div className="featured-content">
                 <h3>{place.name}</h3>
                 <span className="category-tag">{place.category}</span>
-                <p>{place.shortDescription || place.description.substring(0, 100)}...</p>
+                <p>
+                  {place.shortDescription ||
+                    place.description?.substring(0, 100) ||
+                    'No description available'}
+                  ...
+                </p>
                 <div className="featured-footer">
-                  <span className="distance"><FaMapMarkedAlt /> {place.distance}km away</span>
+                  <span className="distance">
+                    <FaMapMarkedAlt /> {place.distance}km away
+                  </span>
                   <span className="explore-link">Explore →</span>
                 </div>
               </div>
@@ -205,7 +302,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Golden Hour Photography Section */}
       <section className="golden-hour-section">
         <div className="golden-hour-container">
           <div className="golden-hour-content">
@@ -213,7 +309,10 @@ const Home = () => {
               <FaSun className="golden-sun" /> Golden Hour
             </div>
             <h2>Capture the Perfect Shot</h2>
-            <p>Visit during sunrise (6:00-7:00 AM) or sunset (5:30-6:30 PM) for the best lighting conditions and stunning photographs!</p>
+            <p>
+              Visit during sunrise (6:00-7:00 AM) or sunset (5:30-6:30 PM) for the best
+              lighting conditions and stunning photographs!
+            </p>
             <div className="photography-tips">
               <div className="tip-card">
                 <div className="tip-icon">🌅</div>
@@ -230,21 +329,26 @@ const Home = () => {
             </div>
           </div>
           <div className="golden-hour-image">
-            <img src="https://images.unsplash.com/photo-1414016642750-7fdd78dc33d9" alt="Golden Hour Photography" />
+            <img
+              src="https://images.unsplash.com/photo-1414016642750-7fdd78dc33d9"
+              alt="Golden Hour Photography"
+            />
           </div>
         </div>
       </section>
 
-      {/* Instagram Gallery Section */}
       <section className="instagram-section">
         <div className="section-header">
           <h2><FaCamera /> Instagram Worthy Spots</h2>
           <p>Most photogenic locations for your social media</p>
         </div>
         <div className="instagram-grid">
-          {featuredPlaces.slice(0, 6).map(place => (
+          {featuredPlaces.slice(0, 6).map((place) => (
             <div key={place._id} className="instagram-item">
-              <img src={place.images?.[0]?.url || 'https://via.placeholder.com/300'} alt={place.name} />
+              <img
+                src={getImageUrl(place, 'https://via.placeholder.com/300')}
+                alt={place.name}
+              />
               <div className="instagram-overlay">
                 <FaCamera />
                 <span>{place.name}</span>
@@ -254,7 +358,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
       <section className="newsletter-section">
         <div className="newsletter-container">
           <h2>Get Travel Inspiration</h2>

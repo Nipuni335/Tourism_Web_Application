@@ -39,7 +39,7 @@ const PlaceDetail = () => {
 
   const addToItinerary = () => {
     const itinerary = JSON.parse(localStorage.getItem('itinerary') || '[]');
-    if (!itinerary.find(p => p.id === id)) {
+    if (!itinerary.find((p) => p.id === id)) {
       itinerary.push({ id: id, name: place.name, order: itinerary.length + 1 });
       localStorage.setItem('itinerary', JSON.stringify(itinerary));
       alert(`${place.name} added to your itinerary!`);
@@ -57,17 +57,22 @@ const PlaceDetail = () => {
         {/* Image Gallery */}
         <div className="gallery-section">
           <div className="main-image">
-            <img 
-              src={place.images?.[selectedImage]?.url || 'https://via.placeholder.com/800x500'} 
+            <img
+              src={
+                place.images?.[selectedImage]?.url
+                  ? `http://localhost:5000${place.images[selectedImage].url}`
+                  : 'https://via.placeholder.com/800x500'
+              }
               alt={place.name}
             />
           </div>
+
           {place.images && place.images.length > 1 && (
             <div className="thumbnail-gallery">
               {place.images.map((img, idx) => (
                 <img
                   key={idx}
-                  src={img.url}
+                  src={img.url ? `http://localhost:5000${img.url}` : 'https://via.placeholder.com/150'}
                   alt={`${place.name} ${idx + 1}`}
                   className={`thumbnail ${selectedImage === idx ? 'active' : ''}`}
                   onClick={() => setSelectedImage(idx)}
@@ -81,7 +86,7 @@ const PlaceDetail = () => {
         <div className="info-section">
           <h1>{place.name}</h1>
           <div className="category-tag-large">{place.category}</div>
-          
+
           <div className="quick-info">
             <div className="info-card">
               <FaMapMarkerAlt className="info-icon" />
@@ -90,6 +95,7 @@ const PlaceDetail = () => {
                 <p>{place.distance} km from center</p>
               </div>
             </div>
+
             {place.bestTimeToVisit && (
               <div className="info-card">
                 <FaSun className="info-icon" />
@@ -99,12 +105,15 @@ const PlaceDetail = () => {
                 </div>
               </div>
             )}
+
             {place.entryFee && (
               <div className="info-card">
                 <FaDollarSign className="info-icon" />
                 <div>
                   <strong>Entry Fee</strong>
-                  <p>Local: LKR {place.entryFee.local} | Foreign: LKR {place.entryFee.foreign}</p>
+                  <p>
+                    Local: LKR {place.entryFee.local} | Foreign: LKR {place.entryFee.foreign}
+                  </p>
                 </div>
               </div>
             )}
@@ -142,9 +151,9 @@ const PlaceDetail = () => {
         {/* Map Section */}
         <div className="map-section">
           <h3>Location Map</h3>
-          <MapContainer 
-            center={[place.location.lat, place.location.lng]} 
-            zoom={13} 
+          <MapContainer
+            center={[place.location.lat, place.location.lng]}
+            zoom={13}
             style={{ height: '400px', width: '100%', borderRadius: '15px' }}
           >
             <TileLayer
@@ -167,12 +176,14 @@ const PlaceDetail = () => {
                 <span>Best lighting: Sunrise around {place.bestTimeToVisit.sunrise}</span>
               </div>
             )}
+
             {place.bestTimeToVisit?.sunset && (
               <div className="tip-item">
                 <FaMoon className="tip-icon sunset" />
                 <span>Golden hour: Sunset around {place.bestTimeToVisit.sunset}</span>
               </div>
             )}
+
             <div className="tip-item">
               <FaCamera className="tip-icon" />
               <span>Recommended gear: Wide-angle lens for landscapes</span>

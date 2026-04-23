@@ -4,6 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaMapMarkerAlt, FaClock, FaFilter } from 'react-icons/fa';
 import './Places.css';
 
+const BACKEND_URL = 'http://localhost:5000';
+
 const Places = () => {
   const [places, setPlaces] = useState([]);
   const [filteredPlaces, setFilteredPlaces] = useState([]);
@@ -23,11 +25,11 @@ const Places = () => {
     if (search) {
       handleSearch(search);
     }
-  }, [location.search]);
+  }, [location.search, places]);
 
   const fetchPlaces = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/places');
+      const response = await axios.get(`${BACKEND_URL}/api/places`);
       setPlaces(response.data);
       setFilteredPlaces(response.data);
       setLoading(false);
@@ -39,26 +41,44 @@ const Places = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/categories');
+      const response = await axios.get(`${BACKEND_URL}/api/categories`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
   };
 
+  const getImageUrl = (place) => {
+    if (!place.images || place.images.length === 0) {
+      return 'https://via.placeholder.com/400x300';
+    }
+
+    const imageObj = place.images[0];
+
+    if (!imageObj?.url) {
+      return 'https://via.placeholder.com/400x300';
+    }
+
+    return imageObj.url.startsWith('http')
+      ? imageObj.url
+      : `${BACKEND_URL}${imageObj.url}`;
+  };
+
   const handleCategoryFilter = (category) => {
     setSelectedCategory(category);
+
     if (category === '') {
       setFilteredPlaces(places);
     } else {
-      setFilteredPlaces(places.filter(place => place.category === category));
+      setFilteredPlaces(places.filter((place) => place.category === category));
     }
   };
 
   const handleSearch = (searchTerm) => {
-    const filtered = places.filter(place => 
-      place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      place.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = places.filter(
+      (place) =>
+        place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        place.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredPlaces(filtered);
   };
@@ -79,14 +99,16 @@ const Places = () => {
           <FaFilter className="filter-icon" />
           <span>Filter by Category</span>
         </div>
+
         <div className="category-filters">
-          <button 
+          <button
             className={`filter-btn ${selectedCategory === '' ? 'active' : ''}`}
             onClick={() => handleCategoryFilter('')}
           >
             All
           </button>
-          {['Sightseeing', 'Restaurants', 'Monuments', 'Religious Sites', 'Nature', 'Historical', 'Archaeological', 'Lake'].map(category => (
+
+          {['Sightseeing', 'Restaurants', 'Monuments', 'Religious Sites', 'Nature', 'Historical', 'Archaeological', 'Lake'].map((category) => (
             <button
               key={category}
               className={`filter-btn ${selectedCategory === category ? 'active' : ''}`}
@@ -106,22 +128,31 @@ const Places = () => {
           </div>
         ) : (
           <div className="places-grid">
-            {filteredPlaces.map(place => (
+            {filteredPlaces.map((place) => (
               <Link to={`/place/${place._id}`} key={place._id} className="place-card-large">
                 <div className="card-image">
-                  <img src={place.images?.[0]?.url || 'https://via.placeholder.com/400x300'} alt={place.name} />
+                  <img
+                    src={getImageUrl(place)}
+                    alt={place.name}
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/400x300';
+                    }}
+                  />
                   {place.trending && <span className="trending-badge">🔥 Trending</span>}
                 </div>
+
                 <div className="card-details">
                   <h3>{place.name}</h3>
                   <span className="category-badge">{place.category}</span>
                   <p>{place.shortDescription || place.description.substring(0, 120)}...</p>
+
                   <div className="place-info">
                     <span><FaMapMarkerAlt /> {place.distance} km from center</span>
                     {place.bestTimeToVisit?.sunset && (
                       <span><FaClock /> Best at {place.bestTimeToVisit.sunset}</span>
                     )}
                   </div>
+
                   <div className="learn-more">Learn More →</div>
                 </div>
               </Link>

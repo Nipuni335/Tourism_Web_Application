@@ -4,7 +4,11 @@ const jwt = require('jsonwebtoken');
 
 // Generate JWT Token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+  return jwt.sign(
+    { id },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE }
+  );
 };
 
 // @desc    Register admin
@@ -13,7 +17,10 @@ const registerAdmin = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    const adminExists = await Admin.findOne({ $or: [{ email }, { username }] });
+    const adminExists = await Admin.findOne({
+      $or: [{ email }, { username }]
+    });
+
     if (adminExists) {
       return res.status(400).json({ message: 'Admin already exists' });
     }
@@ -81,8 +88,12 @@ const getDashboardStats = async (req, res) => {
     const placesByCategory = await Place.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } }
     ]);
-    
-    res.json({ totalPlaces, trendingPlaces, placesByCategory });
+
+    res.json({
+      totalPlaces,
+      trendingPlaces,
+      placesByCategory
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -105,10 +116,10 @@ const createPlace = async (req, res) => {
   try {
     console.log('📝 Creating new place...');
     console.log('Received data:', req.body);
-    
+
     const place = new Place(req.body);
     const savedPlace = await place.save();
-    
+
     console.log('✅ Place created:', savedPlace.name);
     res.status(201).json(savedPlace);
   } catch (error) {
@@ -122,15 +133,17 @@ const createPlace = async (req, res) => {
 const updatePlace = async (req, res) => {
   try {
     const place = await Place.findById(req.params.id);
+
     if (!place) {
       return res.status(404).json({ message: 'Place not found' });
     }
-    
+
     const updatedPlace = await Place.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: Date.now() },
-      { new: true }
+      { new: true, runValidators: true }
     );
+
     res.json(updatedPlace);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -142,9 +155,11 @@ const updatePlace = async (req, res) => {
 const deletePlace = async (req, res) => {
   try {
     const place = await Place.findById(req.params.id);
+
     if (!place) {
       return res.status(404).json({ message: 'Place not found' });
     }
+
     await place.deleteOne();
     res.json({ message: 'Place deleted successfully' });
   } catch (error) {
@@ -152,7 +167,6 @@ const deletePlace = async (req, res) => {
   }
 };
 
-// Export all functions
 module.exports = {
   registerAdmin,
   loginAdmin,

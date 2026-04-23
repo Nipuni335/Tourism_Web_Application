@@ -1,39 +1,57 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './AdminLogin.css';
+
+const BACKEND_URL = 'http://localhost:5000';
 
 const AdminLogin = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const result = await login(email, password);
-    if (result.success) {
-      onClose();
-    } else {
-      setError(result.error);
+    try {
+      const res = await axios.post(`${BACKEND_URL}/api/admin/login`, {
+        email,
+        password
+      });
+
+      localStorage.setItem('adminInfo', JSON.stringify(res.data));
+
+      if (onClose) {
+        onClose();
+      }
+
+      navigate('/admin');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className="admin-login-modal">
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={onClose} type="button">
+            ×
+          </button>
+
           <div className="admin-login-form">
             <h2>Admin Login</h2>
             <p>Enter your credentials to manage content</p>
-            
+
             {error && <div className="error-message">{error}</div>}
-            
+
             <form onSubmit={handleSubmit}>
               <input
                 type="email"
@@ -42,6 +60,7 @@ const AdminLogin = ({ onClose }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+
               <input
                 type="password"
                 placeholder="Password"
@@ -49,11 +68,12 @@ const AdminLogin = ({ onClose }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+
               <button type="submit" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login as Admin'}
               </button>
             </form>
-            
+
             <div className="demo-info">
               <p>Demo Credentials:</p>
               <p>Email: admin@example.com</p>

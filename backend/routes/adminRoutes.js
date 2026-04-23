@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+
 const {
   registerAdmin,
   loginAdmin,
@@ -12,11 +12,13 @@ const {
   deletePlace
 } = require('../controllers/adminController');
 
+const { protect } = require('../middleware/auth');
+
 // Public routes
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
-// Protected routes (require admin token)
+// Protected admin routes
 router.get('/profile', protect, getAdminProfile);
 router.get('/stats', protect, getDashboardStats);
 router.get('/places', protect, getAdminPlaces);
